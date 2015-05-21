@@ -1,0 +1,311 @@
+#EZ Stoltzfus
+#2014
+
+#This program is a game in which you play a mage who duels other mages with
+#golems that fight each other
+
+
+#Generally, p = player , o = opponent, g = golem, m = mage
+
+
+
+import random
+import time
+
+
+
+
+
+
+#GLOBAL Variables and setup: Chop up the 
+
+#Golem Namer: prenom, interstitial, and surnom summoned randomly from 3
+    #dictionaries... to take form like "Zhikaro-kel-Tsadur" as above.
+    #hooray Dwarf Fortress!!!
+
+
+def naming():
+    prenoms = ['Taco', 'Edwin', 'Baarune', 'Reynad', 'Thorzain', 'Gaara',
+               'Magna', 'Mod']
+    interstitials = ['-del-', '-van-', '-von-', '-kar-', '-tul-', '-zhy-',
+                     '-cum-', '-ban-']
+    surnoms = ['Mar', 'Cleef', 'Messerschmidt', 'Trump', 'Boxer', 'Amaz',
+               'Laude', 'Hammer']
+    name = (str(random.choice(prenoms)) + str(random.choice(interstitials)) +
+          str(random.choice(surnoms)))
+    return name
+
+#Names and Sturf. Down here because they use functions above
+    
+p_g_name = str(naming())
+o_g_name = str(naming())
+
+lore1 = str(naming())
+lore2 = str(naming())
+lore3 = str(naming())
+
+#Turn Choice Lists
+
+p_g_choices = ['(A)ggressive Attack', '(D)efensive Attack', '(F)ull Block',
+               '(C)harge Up', '(H)eat Sink', ]
+
+p_m_hand = []
+
+p_m_deck = []
+
+m_deck_fire = ['(L)ava Spear', '(H)eat Blast', '(E)mber', '(Z)holt']
+m_deck_cold = ['(F)rost Veins', '(W)all of Ice', '(B)lizzard', '(G)laciate']
+m_deck_force = ['(S)taff of Force', '(P)ower Spike', '(J)am Slam', '(A)blate']
+m_deck_mage = ['(Q)uicken Spell', '(M)editate', '(C)ounterspell', '(D)rain']
+
+
+p_m_choices = ['(R)egroup', p_m_hand]
+
+p_m_pick = 0
+p_g_pick = 0
+
+
+#Starting conditions for the Golems
+
+p_g_d = 1000
+p_g_h = 300
+p_g_e = 250
+
+o_g_d = 1000
+o_g_h = 300
+o_g_e = 250
+
+#Spell Class?
+#takes the spell key and returns its attributes
+#Attributes as [DmgOpp, HeatOpp, BlockSelf, HeatSelf, EnergySelf, EnergyOpp,
+#..., Special]
+
+spell_keys = ('a, b, c, d, e, f, g, h, j, l, m, p, q, r, s, w, z')
+
+    
+
+
+#Golem Action Class / Dictionary: as above, but for Golem Actions
+
+
+
+
+
+#Spellcasting
+
+magectives = ['Thaumaturgical', 'Conjurational', 'Summonological',
+              'Alechmical', 'Alterational', 'Plasmidological', 'Arcanological',
+              'Illusional', 'Demonological', 'Necrological', 'Zendicisical']
+
+spell_bits = ['@', '\u070D', '\u0710', '\u0713', '\u0717', '\u071B', '\u071A',
+              '\u071E', '\u071F', '\u0720', '\u0721', '\u0723', '\u0725',
+              '\u0726', '\u0727', '\u0728', '\u0729', '\u072C', '\u072E',
+              '\u074A', '\u074D', '\u074E', '\u074F', '\u0950', '\u090B',
+              '\u090C', '\u091B', '\u0950', '\u0986', '\u0989', '\u098B',
+              '\u09A4', '\u09B0', '\u09E0', '\u0B86', '\u0B87', '\u0B88',
+              '\u0B89', '\u0B8A', '\u0B90', '\u0BA3', '\u0BF5', '\u0BF8',
+              '\u0BF9', '\u0BFA', '&']
+
+spell_words = []
+
+#FUNCTIONS Next, cook up the broth
+
+
+
+#This cute little thang just makes a pause length x and a gap line
+
+def p(x):
+    print('')
+    time.sleep(x)
+
+              
+#spell_wording() will select and print 3-7 glyphish unicodes from
+#spell_bits
+
+
+def spell_wording():              
+    print('You Cast the Spell!')  
+    p(0)
+    spell_words = []
+    bit_number = random.randint(3, 7)
+    for x in range(0, bit_number):
+        spell_words.append(random.choice(spell_bits))
+    for y, z in enumerate(spell_words):
+        print(spell_words[y]) 
+    print('')
+
+#Card Draw:
+    #adds deck(s) if draw deck is too low,
+    #then pops a card from draw deck to hand
+
+def draw(x):
+    global p_m_deck
+    while len(p_m_deck) < 8:
+        add_deck = 0
+        print('Your Deck has ' + str(len(p_m_deck)) + ' Cards')
+        print('Low Cards! Pick a Deck to Shuffle In!')
+        print('(F)ire, (C)old, Fo(r)ce, or (M)age')
+        add_deck = input()
+        if add_deck == 'f':
+            p_m_deck.extend(m_deck_fire)
+        elif add_deck == 'c':
+            p_m_deck.extend(m_deck_cold)
+        elif add_deck == 'r':
+            p_m_deck.extend(m_deck_force)
+        elif add_deck == 'm':
+            p_m_deck.extend(m_deck_mage)
+        else:
+            print('Sorry, I Did Not Understand That')
+    else:
+        for count in range(0, x):
+            new_card = p_m_deck.pop(random.randint(0, len(p_m_deck) - 1))
+            p_m_hand.append(new_card)
+        return p_m_hand
+
+#Fight: sets up the starting conditions? Necessary?
+
+
+
+   
+
+#The Turn Engine: Resolve the Choices: "The Tendons and Grisly Shit"
+
+#First, Turn takes the players input and collates them
+
+def turn():
+    selection = 0
+    global p_m_pick
+    global p_g_pick
+    m_set = False
+    g_set = False
+    draw(3)
+    print(p_g_name + '::  Durability: ' + str(p_g_d), 'Heat: ' + str(p_g_h),
+          'Energy: ' + str(p_g_e))
+    p(0)
+    while m_set == False or g_set == False:
+        print('Set (M)age Action or (G)olem Action?')
+        selection = input()
+        if selection == 'm':
+            print('')
+            print('Current Spells in your Aether:' + str(p_m_choices))
+            p_m_pick = input()
+            m_set = True
+            selection = 0
+        elif selection == 'g':
+            print('')
+            print('Current Available Golem Actions:' + str(p_g_choices))
+            p_g_pick = input()
+            g_set = True
+            selection = 0
+        else:
+            print('')
+            print('Try Again')
+    
+            
+
+turn()
+print (str(p_m_pick))
+print (str(p_g_pick))
+
+#Second, Resolve takes the "picks," translates it into numbers, and
+#resolves
+
+def resolve():
+    return
+    
+        
+         
+
+
+
+
+
+#Main Menu
+
+def menu():    
+    selection = 0
+    print('In the Magocracy of Zhikaro-kel-Tsadur, Duels have a Long History')
+    p(0)
+    print('Although still the Main Form of Politics, Mages are Loath to Die')
+    p(0)
+    print('300 Years Ago, Golems were Deemed Acceptable Substitutes')
+    p(0)
+    print('Master your Golem, and Seize your Power!')
+    p(0)
+    print('New (D)ebate?')
+    print('Run (T)utorial?')
+    print('Learn (L)ore?')
+    selection = input()
+    if selection == 'd':
+        print('')
+        print('The Duelling Circle has been Prepared, and '
+               'the Golems are in Position')
+        p(0)
+        print('The Khelazhim Prepare the Traditional '
+              'Blessing of the Duelling Circle')
+        p(0)
+        print('The Perfectly Handsome Young Men Strut, Displaying their Chins')
+        p(0)
+        print('Their Taut Abdominals and Flexed Biceps Glisten with Oil')
+        p(0)
+        print('The Khelazhim Commence Wrestling, Thus Blessing the Circle')
+        p(0)
+        print('Their Thick Dongs Swing Heavily as they Grapple and Grunt')
+        p(0)
+        print('Finally, the Circle is Blessed, and the Debate Provost Appears')
+        p(0)
+        print('Readiness is Affirmed, the Banner is Raised, '
+              'and the Gong Sounds!')
+        p(0)
+        print(str(p_g_name) + ' vs ' + str(o_g_name))
+        p(0)
+        if p_g_name == o_g_name:
+            print('Coincidental Mirror Matchup!!!')
+            p(0)
+        print('FFFFFFIIIIIIIIGGGGGGGGGHHHHHHHHHTTTTTTT!!!!')
+        print('')
+        print('')
+
+        fight()
+    elif selection == 't':
+        print('So You Are a Neophyte to Magiphysickal Debate? ADORABLE')
+        p(0)
+        print('You and Your Telepathically Linked Golem Must Enter THE CIRCLE')
+        p(0)
+        print('Use Spells and Command Your Golem With the GLYPHS OF POWER!')
+        p(0)
+        print('Pummel the Opposing Golem into IDEOLOGICAL SUBMISSION!')
+        p(0)
+        print('Do Not Overheat Your Golem! FIGURE OUT THE REST YOURSELF!')
+        p(3)
+        menu()
+    elif selection == 'l':
+        print('Very Well, A Story. Just Let Me Fix a Lotus Brandy ...')
+        p(5)
+        print('Okay. Ahem. Long Ago, When Zhikaro-kel-Tsadur was Yet Forming')
+        p(0)
+        print('A Mage by the Name of ' + str(lore1) + ' was In Power')
+        p(0)
+        print(str(lore2) + '(Of Whom You Must Already Be Aware) Was Yet Young')
+        p(0)
+        print('And This Was Before ' + str(lore3) + ' Did Her Famous Exploits')
+        p(0)
+        print('The Ideological Battle of The Day was Mainly ' +
+              str(random.choice(magectives)))
+        p(0)
+        print('...')
+        p(0)
+        print('...')
+        p(5)
+        print('[You Fall Asleep, and Dream of DEBATE]')
+        p(0)
+        menu()
+
+
+
+
+
+#Launch Below!!!
+
+
+#menu()
